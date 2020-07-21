@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
 
@@ -48,6 +49,9 @@ type NodeData struct {
 	CPU  int64
 	RAM  int64
 }
+
+var clientset *kubernetes.Clientset
+var metricsClientset *metricsv.Clientset
 
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
@@ -116,18 +120,7 @@ func showInterface() {
 }
 
 func getPodsData() []PodData {
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
-	if err != nil {
-		panic(err.Error())
-	}
-
-	clientset, err := metricsv.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	podMetricsList, err := clientset.MetricsV1beta1().PodMetricses("").List(context.TODO(), metav1.ListOptions{})
+	podMetricsList, err := metricsClientset.MetricsV1beta1().PodMetricses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
@@ -158,6 +151,10 @@ func formatRAMStat(n int64) string {
 
 func init() {
 	rootCmd.AddCommand(statusCmd)
+	viper.AutomaticEnv()
+
+	clientset = getClientSet()
+	metricsClientset = getMetricsClientset()
 
 	// Here you will define your flags and configuration settings.
 
@@ -168,4 +165,35 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// statusCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func getClientSet() *kubernetes.Clientset {
+	// use the current context in kubeconfig
+	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// create the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return clientset
+}
+
+func getMetricsClientset() *metricsv.Clientset {
+	// use the current context in kubeconfig
+	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	metricsClientset, err := metricsv.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return metricsClientset
 }
