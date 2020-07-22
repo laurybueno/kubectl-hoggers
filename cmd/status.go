@@ -53,6 +53,8 @@ type NodeData struct {
 var clientset *kubernetes.Clientset
 var metricsClientset *metricsv.Clientset
 
+var rowsLimit int = 20
+
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
 	Use:   "status",
@@ -88,17 +90,32 @@ func showInterface() {
 
 	for {
 		pods := getPodsData()
+		populateWithNodeData(pods)
 
 		// Prepare a table for the data
 		table := widgets.NewTable()
 		table.Rows = make([][]string, len(pods)+1)
-		table.Rows[0] = []string{"namespace", "name", "CPU", "RAM"}
-		for k, v := range pods {
+		table.Rows[0] = []string{
+			"namespace",
+			"name",
+			"node",
+			"CPU",
+			"RAM",
+		}
+
+		for k := range pods[:rangeLimit(pods)] {
+			var nodeName string
+			if pods[k].node == nil {
+				nodeName = ""
+			} else {
+				nodeName = pods[k].node.name
+			}
 			table.Rows[k+1] = []string{
-				v.namespace,
-				v.name,
-				fmt.Sprintf("%vm", v.CPU.MilliValue()),
-				formatRAMStat(v.RAM.MilliValue()),
+				pods[k].namespace,
+				pods[k].name,
+				nodeName,
+				fmt.Sprintf("%vm", pods[k].CPU.MilliValue()),
+				formatRAMStat(pods[k].RAM.MilliValue()),
 			}
 		}
 
@@ -143,6 +160,16 @@ func getPodsData() []PodData {
 	})
 
 	return pods
+}
+
+func populateWithNodeData(pods []PodData) {
+	for k := range pods[:rangeLimit(pods)] {
+		pod, err := clientset.CoreV1().Pods(pods[k].namespace).Get(context.TODO(), pods[k].name, metav1.GetOptions{})
+		if err != nil {
+			panic(err.Error())
+		}
+		pods[k].node = &NodeData{name: pod.Spec.NodeName}
+	}
 }
 
 func formatRAMStat(n int64) string {
@@ -196,4 +223,15 @@ func getMetricsClientset() *metricsv.Clientset {
 	}
 
 	return metricsClientset
+}
+
+func rangeLimit(pods []PodData) int {
+	minInt := func(x, y int) int {
+		if x < y {
+			return x
+		}
+		return y
+	}
+
+	return minInt(20, len(pods))
 }
