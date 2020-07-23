@@ -50,9 +50,16 @@ type NodeData struct {
 	RAM  int64
 }
 
+// Clients for the k8s' APIs
 var clientset *kubernetes.Clientset
 var metricsClientset *metricsv.Clientset
 
+// UI components
+var grid *ui.Grid
+var table *widgets.Table
+var gauge *widgets.Gauge
+
+// Table row limit
 var rowsLimit int = 20
 
 // statusCmd represents the status command
@@ -74,7 +81,12 @@ func run(cmd *cobra.Command, args []string) {
 	}
 	defer ui.Close()
 
-	go showInterface()
+	// Prepare the grid interface
+	grid = ui.NewGrid()
+	termWidth, termHeight := ui.TerminalDimensions()
+	grid.SetRect(0, 0, termWidth, termHeight)
+
+	go prepareDataTable()
 
 	uiEvents := ui.PollEvents()
 	for {
@@ -86,14 +98,13 @@ func run(cmd *cobra.Command, args []string) {
 	}
 }
 
-func showInterface() {
-
+func prepareDataTable() {
 	for {
 		pods := getPodsData()
 		populateWithNodeData(pods)
 
 		// Prepare a table for the data
-		table := widgets.NewTable()
+		table = widgets.NewTable()
 		table.Rows = make([][]string, len(pods)+1)
 		table.Rows[0] = []string{
 			"namespace",
@@ -119,21 +130,42 @@ func showInterface() {
 			}
 		}
 
-		// Prepare the grid interface
-		grid := ui.NewGrid()
-		termWidth, termHeight := ui.TerminalDimensions()
-		grid.SetRect(0, 0, termWidth, termHeight)
-		grid.Set(
-			ui.NewRow(1.0/1,
-				ui.NewCol(1.0/1, table),
-			),
-		)
-		ui.Render(grid)
+		updateInterface()
 
 		// Wait one second
 		time.Sleep(1000 * time.Millisecond)
 	}
+}
 
+func updateInterface() {
+	if table != nil {
+		grid.Set(
+			ui.NewRow(1.0/10,
+				ui.NewCol(1.0/2, nil),
+				ui.NewCol(1.0/2, gauge),
+			),
+			ui.NewRow(9.0/10,
+				ui.NewCol(1.0/1, table),
+			),
+		)
+	} else {
+		// Tableless grid
+		grid.Set(
+			ui.NewRow(1.0/10,
+				ui.NewCol(1.0/2, nil),
+				ui.NewCol(1.0/2, gauge),
+			),
+		)
+	}
+
+	ui.Render(grid)
+}
+
+func updateGauge(current, total int) {
+	gauge = widgets.NewGauge()
+	gauge.Percent = int((float64(current) / float64(total)) * 100.0)
+
+	updateInterface()
 }
 
 func getPodsData() []PodData {
@@ -159,6 +191,8 @@ func getPodsData() []PodData {
 		return pods[i].CPU.MilliValue() > pods[j].CPU.MilliValue()
 	})
 
+	go updateGauge(1, len(pods))
+
 	return pods
 }
 
@@ -169,6 +203,7 @@ func populateWithNodeData(pods []PodData) {
 			panic(err.Error())
 		}
 		pods[k].node = &NodeData{name: pod.Spec.NodeName}
+		go updateGauge(k+1, len(pods))
 	}
 }
 
@@ -233,5 +268,5 @@ func rangeLimit(pods []PodData) int {
 		return y
 	}
 
-	return minInt(20, len(pods))
+	return minInt(rowsLimit, len(pods))
 }
