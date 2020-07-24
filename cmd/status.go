@@ -62,6 +62,9 @@ var gauge *widgets.Gauge
 // Table row limit
 var rowsLimit int = 20
 
+// API checking interval in seconds
+const apiCheckInterval = 10
+
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
 	Use:   "status",
@@ -132,8 +135,8 @@ func prepareDataTable() {
 
 		updateInterface()
 
-		// Wait one second
-		time.Sleep(1000 * time.Millisecond)
+		// Wait before checking again
+		time.Sleep(apiCheckInterval * time.Second)
 	}
 }
 
