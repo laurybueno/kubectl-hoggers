@@ -58,6 +58,7 @@ var metricsClientset *metricsv.Clientset
 var grid *ui.Grid
 var table *widgets.Table
 var gauge *widgets.Gauge
+var progressText *widgets.Paragraph
 
 // Table row limit
 var rowsLimit int = 20
@@ -107,7 +108,9 @@ func prepareDataTable() {
 		populateWithNodeData(pods)
 
 		// Prepare a table for the data
-		table = widgets.NewTable()
+		if table == nil {
+			table = widgets.NewTable()
+		}
 		table.Rows = make([][]string, len(pods)+1)
 		table.Rows[0] = []string{
 			"namespace",
@@ -143,20 +146,22 @@ func prepareDataTable() {
 func updateInterface() {
 	if table != nil {
 		grid.Set(
-			ui.NewRow(1.0/10,
+			ui.NewRow(1.2/10,
 				ui.NewCol(1.0/2, nil),
-				ui.NewCol(1.0/2, gauge),
+				ui.NewCol(1.0/4, progressText),
+				ui.NewCol(1.0/4, gauge),
 			),
-			ui.NewRow(9.0/10,
+			ui.NewRow(9.8/10,
 				ui.NewCol(1.0/1, table),
 			),
 		)
 	} else {
 		// Tableless grid
 		grid.Set(
-			ui.NewRow(1.0/10,
+			ui.NewRow(1.2/10,
 				ui.NewCol(1.0/2, nil),
-				ui.NewCol(1.0/2, gauge),
+				ui.NewCol(1.0/4, progressText),
+				ui.NewCol(1.0/4, gauge),
 			),
 		)
 	}
@@ -165,7 +170,13 @@ func updateInterface() {
 }
 
 func updateGauge(current, total int) {
-	gauge = widgets.NewGauge()
+	if gauge == nil {
+		gauge = widgets.NewGauge()
+		gauge.Title = "Refreshing"
+
+		progressText = widgets.NewParagraph()
+		progressText.Text = fmt.Sprintf("Fetching data from k8s API (every %v seconds)", apiCheckInterval)
+	}
 	gauge.Percent = int((float64(current) / float64(total)) * 100.0)
 
 	updateInterface()
