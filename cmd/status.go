@@ -194,7 +194,7 @@ func getPodsData() []PodData {
 		return pods[i].CPU.MilliValue() > pods[j].CPU.MilliValue()
 	})
 
-	go updateGauge(1, len(pods))
+	go updateGauge(1, rangeLimit(pods))
 
 	return pods
 }
@@ -206,7 +206,7 @@ func populateWithNodeData(pods []PodData) {
 			panic(err.Error())
 		}
 		pods[k].node = &NodeData{name: pod.Spec.NodeName}
-		go updateGauge(k+1, len(pods))
+		go updateGauge(k+1, rangeLimit(pods))
 	}
 }
 
