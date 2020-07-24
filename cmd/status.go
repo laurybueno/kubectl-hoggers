@@ -126,7 +126,7 @@ func prepareDataTable() {
 				pods[k].name,
 				nodeName,
 				fmt.Sprintf("%vm", pods[k].CPU.MilliValue()),
-				formatRAMStat(pods[k].RAM.MilliValue()),
+				formatRAMStat(pods[k].RAM),
 			}
 		}
 
@@ -207,8 +207,10 @@ func populateWithNodeData(pods []PodData) {
 	}
 }
 
-func formatRAMStat(n int64) string {
-	return fmt.Sprintf("%vM", n/10e8)
+func formatRAMStat(n *resource.Quantity) string {
+	// We do the RAM math here just like "kubectl top"
+	// https://github.com/kubernetes/kubectl/blob/1cd20c9a5d1819f38ef95b87748ab04dc749ddb2/pkg/metricsutil/metrics_printer.go#L313
+	return fmt.Sprintf("%vMi", n.Value()/(1024*1024))
 }
 
 func init() {
