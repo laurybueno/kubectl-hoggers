@@ -149,7 +149,7 @@ func updateGauge(current, total int) {
 		gauge = widgets.NewGauge()
 
 		progressText = widgets.NewParagraph()
-		progressText.Text = fmt.Sprintf("[Fetching data from k8s API (every %v seconds)](fg:green)", apiCheckInterval)
+		progressText.Text = fmt.Sprintf("[Pods consuming most resources (refreshes every %v seconds)](fg:green)", apiCheckInterval)
 		progressText.BorderStyle.Fg = ui.ColorGreen
 	}
 
