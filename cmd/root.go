@@ -20,9 +20,16 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
 
 	"github.com/spf13/viper"
 )
+
+// Clients for the k8s' APIs
+var clientset *kubernetes.Clientset
+var metricsClientset *metricsv.Clientset
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -42,6 +49,37 @@ func Execute() {
 	}
 }
 
+func getClientSet() *kubernetes.Clientset {
+	// use the current context in kubeconfig
+	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	// create the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return clientset
+}
+
+func getMetricsClientset() *metricsv.Clientset {
+	// use the current context in kubeconfig
+	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
+	if err != nil {
+		panic(err.Error())
+	}
+
+	metricsClientset, err := metricsv.NewForConfig(config)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	return metricsClientset
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 
@@ -59,4 +97,7 @@ func init() {
 // initConfig reads in ENV variables if set.
 func initConfig() {
 	viper.AutomaticEnv() // read in environment variables
+
+	clientset = getClientSet()
+	metricsClientset = getMetricsClientset()
 }

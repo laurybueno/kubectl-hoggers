@@ -23,12 +23,8 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	metricsv "k8s.io/metrics/pkg/client/clientset/versioned"
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
@@ -42,10 +38,6 @@ type PodData struct {
 	CPU       *resource.Quantity
 	RAM       *resource.Quantity
 }
-
-// Clients for the k8s' APIs
-var clientset *kubernetes.Clientset
-var metricsClientset *metricsv.Clientset
 
 // UI components
 var grid *ui.Grid
@@ -65,10 +57,10 @@ var statusCmd = &cobra.Command{
 	Short: "Watch pods consuming most resources",
 	Long: `List pods consuming most CPU resources along with its corresponding nodes.
 Refreshes every 10 seconds.`,
-	Run: run,
+	Run: runStatus,
 }
 
-func run(cmd *cobra.Command, args []string) {
+func runStatus(cmd *cobra.Command, args []string) {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}
@@ -228,41 +220,6 @@ func formatRAMStat(n *resource.Quantity) string {
 
 func init() {
 	rootCmd.AddCommand(statusCmd)
-	viper.AutomaticEnv()
-
-	clientset = getClientSet()
-	metricsClientset = getMetricsClientset()
-}
-
-func getClientSet() *kubernetes.Clientset {
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
-	if err != nil {
-		panic(err.Error())
-	}
-
-	// create the clientset
-	clientset, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return clientset
-}
-
-func getMetricsClientset() *metricsv.Clientset {
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
-	if err != nil {
-		panic(err.Error())
-	}
-
-	metricsClientset, err := metricsv.NewForConfig(config)
-	if err != nil {
-		panic(err.Error())
-	}
-
-	return metricsClientset
 }
 
 func rangeLimit(pods []PodData) int {
