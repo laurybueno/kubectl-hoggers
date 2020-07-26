@@ -180,11 +180,13 @@ func updateGauge(current, total int) {
 		gauge.BarColor = ui.ColorGreen
 		gauge.TitleStyle.Fg = ui.ColorGreen
 		gauge.BorderStyle.Fg = ui.ColorGreen
+		gauge.LabelStyle = ui.NewStyle(ui.ColorGreen)
 	} else {
 		gauge.Title = "Refreshing data"
 		gauge.BarColor = ui.ColorYellow
 		gauge.TitleStyle.Fg = ui.ColorYellow
 		gauge.BorderStyle.Fg = ui.ColorYellow
+		gauge.LabelStyle = ui.NewStyle(ui.ColorYellow)
 	}
 	gauge.Percent = percent
 
