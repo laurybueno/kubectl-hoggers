@@ -105,7 +105,7 @@ func run(cmd *cobra.Command, args []string) {
 func prepareDataTable() {
 	for {
 		pods := getPodsData()
-		populateWithNodeData(pods)
+		getNodeNameForPods(pods)
 
 		// Prepare a table for the data
 		if table == nil {
@@ -210,7 +210,8 @@ func getPodsData() []PodData {
 	return pods
 }
 
-func populateWithNodeData(pods []PodData) {
+// Get a list of pods and find out in wich node each is
+func getNodeNameForPods(pods []PodData) {
 	for k := range pods[:rangeLimit(pods)] {
 		pod, err := clientset.CoreV1().Pods(pods[k].namespace).Get(context.TODO(), pods[k].name, metav1.GetOptions{})
 		if err != nil {
