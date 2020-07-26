@@ -110,6 +110,9 @@ func prepareDataTable() {
 		// Prepare a table for the data
 		if table == nil {
 			table = widgets.NewTable()
+			table.TextAlignment = ui.AlignCenter
+			table.TextStyle = ui.NewStyle(ui.ColorGreen)
+			table.BorderStyle = ui.NewStyle(ui.ColorGreen)
 		}
 		table.Rows = make([][]string, len(pods)+1)
 		table.Rows[0] = []string{
@@ -144,25 +147,22 @@ func prepareDataTable() {
 }
 
 func updateInterface() {
+	firstLine := ui.NewRow(1.0/10,
+		ui.NewCol(3.0/4, progressText),
+		ui.NewCol(1.0/4, gauge),
+	)
+
 	if table != nil {
 		grid.Set(
-			ui.NewRow(1.2/10,
-				ui.NewCol(1.0/2, nil),
-				ui.NewCol(1.0/4, progressText),
-				ui.NewCol(1.0/4, gauge),
-			),
-			ui.NewRow(9.8/10,
+			firstLine,
+			ui.NewRow(9.0/10,
 				ui.NewCol(1.0/1, table),
 			),
 		)
 	} else {
 		// Tableless grid
 		grid.Set(
-			ui.NewRow(1.2/10,
-				ui.NewCol(1.0/2, nil),
-				ui.NewCol(1.0/4, progressText),
-				ui.NewCol(1.0/4, gauge),
-			),
+			firstLine,
 		)
 	}
 
@@ -172,12 +172,25 @@ func updateInterface() {
 func updateGauge(current, total int) {
 	if gauge == nil {
 		gauge = widgets.NewGauge()
-		gauge.Title = "Refreshing"
 
 		progressText = widgets.NewParagraph()
-		progressText.Text = fmt.Sprintf("Fetching data from k8s API (every %v seconds)", apiCheckInterval)
+		progressText.Text = fmt.Sprintf("[Fetching data from k8s API (every %v seconds)](fg:green)", apiCheckInterval)
+		progressText.BorderStyle.Fg = ui.ColorGreen
 	}
-	gauge.Percent = int((float64(current) / float64(total)) * 100.0)
+
+	percent := int((float64(current) / float64(total)) * 100.0)
+	if percent == 100 {
+		gauge.Title = "Waiting"
+		gauge.BarColor = ui.ColorGreen
+		gauge.TitleStyle.Fg = ui.ColorGreen
+		gauge.BorderStyle.Fg = ui.ColorGreen
+	} else {
+		gauge.Title = "Refreshing data"
+		gauge.BarColor = ui.ColorYellow
+		gauge.TitleStyle.Fg = ui.ColorYellow
+		gauge.BorderStyle.Fg = ui.ColorYellow
+	}
+	gauge.Percent = percent
 
 	updateInterface()
 }
