@@ -38,16 +38,9 @@ import (
 type PodData struct {
 	name      string
 	namespace string
-	node      *NodeData
+	node      string
 	CPU       *resource.Quantity
 	RAM       *resource.Quantity
-}
-
-// NodeData from the main Kubernetes APIs
-type NodeData struct {
-	name string
-	CPU  int64
-	RAM  int64
 }
 
 // Clients for the k8s' APIs
@@ -120,16 +113,10 @@ func prepareDataTable() {
 		}
 
 		for k := range pods[:rangeLimit(pods)] {
-			var nodeName string
-			if pods[k].node == nil {
-				nodeName = ""
-			} else {
-				nodeName = pods[k].node.name
-			}
 			table.Rows[k+1] = []string{
 				pods[k].namespace,
 				pods[k].name,
-				nodeName,
+				pods[k].node,
 				fmt.Sprintf("%vm", pods[k].CPU.MilliValue()),
 				formatRAMStat(pods[k].RAM),
 			}
@@ -228,7 +215,7 @@ func getNodeNameForPods(pods []PodData) {
 		if err != nil {
 			panic(err.Error())
 		}
-		pods[k].node = &NodeData{name: pod.Spec.NodeName}
+		pods[k].node = pod.Spec.NodeName
 		go updateGauge(k+1, rangeLimit(pods))
 	}
 }
