@@ -30,8 +30,8 @@ import (
 	"github.com/gizak/termui/v3/widgets"
 )
 
-// PodData from metrics
-type PodData struct {
+// podData from metrics
+type podData struct {
 	name      string
 	namespace string
 	node      string
@@ -173,18 +173,18 @@ func updateGauge(current, total int) {
 	updateInterface()
 }
 
-func getPodsData() []PodData {
+func getPodsData() []podData {
 	podMetricsList, err := metricsClientset.MetricsV1beta1().PodMetricses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
 
-	pods := make([]PodData, len(podMetricsList.Items))
+	pods := make([]podData, len(podMetricsList.Items))
 	for k, v := range podMetricsList.Items {
 		cpu := v.Containers[0].Usage.Cpu()
 		ram := v.Containers[0].Usage.Memory()
 
-		pods[k] = PodData{
+		pods[k] = podData{
 			name:      v.GetName(),
 			namespace: v.GetNamespace(),
 			CPU:       cpu,
@@ -202,7 +202,7 @@ func getPodsData() []PodData {
 }
 
 // Get a list of pods and find out in wich node each is
-func getNodeNameForPods(pods []PodData) {
+func getNodeNameForPods(pods []podData) {
 	for k := range pods[:rangeLimit(pods)] {
 		pod, err := clientset.CoreV1().Pods(pods[k].namespace).Get(context.TODO(), pods[k].name, metav1.GetOptions{})
 		if err != nil {
@@ -223,7 +223,7 @@ func init() {
 	rootCmd.AddCommand(statusCmd)
 }
 
-func rangeLimit(pods []PodData) int {
+func rangeLimit(pods []podData) int {
 	minInt := func(x, y int) int {
 		if x < y {
 			return x
