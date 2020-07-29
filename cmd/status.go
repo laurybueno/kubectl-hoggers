@@ -54,9 +54,10 @@ const apiCheckInterval = 10
 // statusCmd represents the status command
 var statusCmd = &cobra.Command{
 	Use:   "status",
-	Short: "Watch pods consuming most resources",
+	Short: "Watch pods consuming most resources (requires metrics-server)",
 	Long: `List pods consuming most CPU resources along with its corresponding nodes.
-Refreshes every 10 seconds.`,
+Refreshes every 10 seconds.
+Requires metrics-server.`,
 	Run: runStatus,
 }
 
