@@ -28,6 +28,7 @@ import (
 
 	ui "github.com/gizak/termui/v3"
 	"github.com/gizak/termui/v3/widgets"
+	tb "github.com/nsf/termbox-go"
 )
 
 // podData from metrics
@@ -65,6 +66,8 @@ func runStatus(cmd *cobra.Command, args []string) {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}
+	// Disable mouse input so that copy and paste works
+	tb.SetInputMode(tb.InputEsc)
 	defer ui.Close()
 
 	// Prepare the grid interface
