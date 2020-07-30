@@ -98,6 +98,7 @@ func prepareDataTable() {
 			table.TextAlignment = ui.AlignCenter
 			table.TextStyle = ui.NewStyle(ui.ColorGreen)
 			table.BorderStyle = ui.NewStyle(ui.ColorGreen)
+			table.Border = false
 		}
 		table.Rows = make([][]string, len(pods)+1)
 		table.Rows[0] = []string{
@@ -153,8 +154,8 @@ func updateGauge(current, total int) {
 		gauge = widgets.NewGauge()
 
 		progressText = widgets.NewParagraph()
-		progressText.Text = fmt.Sprintf("[Pods consuming most resources (refreshes every %v seconds)](fg:green)", apiCheckInterval)
-		progressText.BorderStyle.Fg = ui.ColorGreen
+		progressText.Text = fmt.Sprintf("[Pods consuming most CPU (refreshes every %v seconds)](fg:green)", apiCheckInterval)
+		progressText.Border = false
 	}
 
 	percent := int((float64(current) / float64(total)) * 100.0)
