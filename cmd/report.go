@@ -79,22 +79,22 @@ func runReport(cmd *cobra.Command, args []string) {
 		var committedRAM int64
 		var unRestrictedPods int64
 		for k := range podList.Items {
-			// TODO: take multiple containers per pod into account
 			// TODO: what happens when only one of requests or limits is defined?
-
 			restricted := false
-			requests := podList.Items[k].Spec.Containers[0].Resources.Requests
-			if requests != nil {
-				reservedCPU += requests.Cpu().MilliValue()
-				reservedRAM += requests.Memory().Value()
-				restricted = true
-			}
+			for _, v := range podList.Items[k].Spec.Containers {
+				requests := v.Resources.Requests
+				if requests != nil {
+					reservedCPU += requests.Cpu().MilliValue()
+					reservedRAM += requests.Memory().Value()
+					restricted = true
+				}
 
-			limits := podList.Items[k].Spec.Containers[0].Resources.Limits
-			if limits != nil {
-				committedCPU += limits.Cpu().MilliValue()
-				committedRAM += limits.Memory().Value()
-				restricted = true
+				limits := v.Resources.Limits
+				if limits != nil {
+					committedCPU += limits.Cpu().MilliValue()
+					committedRAM += limits.Memory().Value()
+					restricted = true
+				}
 			}
 			if !restricted {
 				unRestrictedPods++
