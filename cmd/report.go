@@ -46,14 +46,9 @@ type nodeData struct {
 // reportCmd represents the report command
 var reportCmd = &cobra.Command{
 	Use:   "report",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: runReport,
+	Short: "Resource commitment by node",
+	Long:  ``,
+	Run:   runReport,
 }
 
 func runReport(cmd *cobra.Command, args []string) {
@@ -136,7 +131,7 @@ func runReport(cmd *cobra.Command, args []string) {
 
 	// Prepare title
 	title := widgets.NewParagraph()
-	title.Text = "[Resource commitment by node](fg:green)"
+	title.Text = "[Resource commitment by pod 'limit' for each node](fg:green)"
 	title.Border = false
 
 	// Prepare table styles
