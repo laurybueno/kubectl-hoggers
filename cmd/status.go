@@ -180,6 +180,8 @@ func updateGauge(current, total int) {
 func getPodsData() []podData {
 	podMetricsList, err := metricsClientset.MetricsV1beta1().PodMetricses("").List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
+		ui.Close()
+		fmt.Print("Failed to get data from the metrics-server.\nAre you sure there is one on the current cluster?\n\n")
 		panic(err.Error())
 	}
 
