@@ -46,8 +46,8 @@ type nodeData struct {
 // reportCmd represents the report command
 var reportCmd = &cobra.Command{
 	Use:   "report",
-	Short: "Resource commitment by node",
-	Long:  ``,
+	Short: "Check CPU and RAM commitment by node",
+	Long:  `Check CPU and RAM reservations/limits for each node in a cluster`,
 	Run:   runReport,
 }
 
