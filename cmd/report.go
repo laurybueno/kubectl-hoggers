@@ -165,8 +165,8 @@ func runReport(cmd *cobra.Command, args []string) {
 		"totalPods",
 		"unRestrictedPods",
 		"committedCPU",
-		"committedRAM",
 		"committedCPU (% of total)",
+		"committedRAM",
 		"committedRAM (% of total)",
 	}
 
@@ -177,8 +177,8 @@ func runReport(cmd *cobra.Command, args []string) {
 			fmt.Sprintf("%v", nodes[k].totalPods),
 			fmt.Sprintf("%v", nodes[k].unRestrictedPods),
 			fmt.Sprintf("%vm", nodes[k].committedCPU),
-			fmt.Sprintf("%vMi", nodes[k].committedRAM/(1024*1024)),
 			fmt.Sprintf("%.2f%%", nodes[k].commitmentCPU*100),
+			fmt.Sprintf("%vMi", nodes[k].committedRAM/(1024*1024)),
 			fmt.Sprintf("%.2f%%", nodes[k].commitmentRAM*100),
 		}
 	}
