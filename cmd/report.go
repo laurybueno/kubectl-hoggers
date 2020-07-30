@@ -57,11 +57,13 @@ to quickly create a Cobra application.`,
 }
 
 func runReport(cmd *cobra.Command, args []string) {
+	// Get all nodes
 	nodeList, err := clientset.CoreV1().Nodes().List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		panic(err.Error())
 	}
 
+	// For each node, check all pods and summarize data
 	nodes := make([]nodeData, len(nodeList.Items))
 	for k := range nodeList.Items {
 		options := metav1.ListOptions{
@@ -132,10 +134,12 @@ func runReport(cmd *cobra.Command, args []string) {
 	termWidth, termHeight := ui.TerminalDimensions()
 	grid.SetRect(0, 0, termWidth, termHeight)
 
+	// Prepare title
 	title := widgets.NewParagraph()
 	title.Text = "[Resource commitment by node](fg:green)"
 	title.Border = false
 
+	// Prepare table styles
 	table := widgets.NewTable()
 	table.TextStyle = ui.NewStyle(ui.ColorGreen)
 	table.BorderStyle = ui.NewStyle(ui.ColorGreen)
@@ -143,6 +147,7 @@ func runReport(cmd *cobra.Command, args []string) {
 	table.TextAlignment = ui.AlignCenter
 	table.SetRect(0, 0, termWidth, termHeight)
 
+	// Prepare main grid
 	grid.Set(
 		ui.NewRow(1.0/10,
 			ui.NewCol(1.0/1, title),
@@ -165,6 +170,7 @@ func runReport(cmd *cobra.Command, args []string) {
 		"committedRAM (% of total)",
 	}
 
+	// Table data
 	for k := range nodes {
 		table.Rows[k+1] = []string{
 			nodes[k].name,
