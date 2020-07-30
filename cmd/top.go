@@ -52,17 +52,17 @@ var rowsLimit int = 20
 // API checking interval in seconds
 const apiCheckInterval = 10
 
-// statusCmd represents the status command
-var statusCmd = &cobra.Command{
-	Use:   "status",
+// topCmd represents the top command
+var topCmd = &cobra.Command{
+	Use:   "top",
 	Short: "Watch pods consuming most resources (requires metrics-server)",
 	Long: `List pods consuming most CPU resources along with its corresponding nodes.
 Refreshes every 10 seconds.
 Requires metrics-server.`,
-	Run: runStatus,
+	Run: runTop,
 }
 
-func runStatus(cmd *cobra.Command, args []string) {
+func runTop(cmd *cobra.Command, args []string) {
 	if err := ui.Init(); err != nil {
 		log.Fatalf("failed to initialize termui: %v", err)
 	}
@@ -226,7 +226,7 @@ func formatRAMStat(n *resource.Quantity) string {
 }
 
 func init() {
-	rootCmd.AddCommand(statusCmd)
+	rootCmd.AddCommand(topCmd)
 }
 
 func rangeLimit(pods []podData) int {
