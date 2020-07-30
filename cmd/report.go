@@ -127,12 +127,30 @@ func runReport(cmd *cobra.Command, args []string) {
 	tb.SetInputMode(tb.InputEsc)
 	defer ui.Close()
 
+	// Prepare the grid interface
+	grid = ui.NewGrid()
+	termWidth, termHeight := ui.TerminalDimensions()
+	grid.SetRect(0, 0, termWidth, termHeight)
+
+	title := widgets.NewParagraph()
+	title.Text = "[Resource commitment by node](fg:green)"
+	title.Border = false
+
 	table := widgets.NewTable()
 	table.TextStyle = ui.NewStyle(ui.ColorGreen)
 	table.BorderStyle = ui.NewStyle(ui.ColorGreen)
+	table.Border = false
 	table.TextAlignment = ui.AlignCenter
-	termWidth, termHeight := ui.TerminalDimensions()
 	table.SetRect(0, 0, termWidth, termHeight)
+
+	grid.Set(
+		ui.NewRow(1.0/10,
+			ui.NewCol(1.0/1, title),
+		),
+		ui.NewRow(9.0/10,
+			ui.NewCol(1.0/1, table),
+		),
+	)
 
 	table.Rows = make([][]string, len(nodes)+1)
 
@@ -141,12 +159,10 @@ func runReport(cmd *cobra.Command, args []string) {
 		"name",
 		"totalPods",
 		"unRestrictedPods",
-		"allocatableCPU",
-		"allocatableRAM",
 		"committedCPU",
 		"committedRAM",
-		"commitmentCPU (%)",
-		"commitmentRAM (%)",
+		"committedCPU (% of total)",
+		"committedRAM (% of total)",
 	}
 
 	for k := range nodes {
@@ -154,16 +170,14 @@ func runReport(cmd *cobra.Command, args []string) {
 			nodes[k].name,
 			fmt.Sprintf("%v", nodes[k].totalPods),
 			fmt.Sprintf("%v", nodes[k].unRestrictedPods),
-			fmt.Sprintf("%vm", nodes[k].allocatableCPU),
-			fmt.Sprintf("%vMi", nodes[k].allocatableRAM/(1024*1024)),
 			fmt.Sprintf("%vm", nodes[k].committedCPU),
 			fmt.Sprintf("%vMi", nodes[k].committedRAM/(1024*1024)),
-			fmt.Sprintf("%v%%", nodes[k].commitmentCPU*100),
-			fmt.Sprintf("%v%%", nodes[k].commitmentRAM*100),
+			fmt.Sprintf("%.2f%%", nodes[k].commitmentCPU*100),
+			fmt.Sprintf("%.2f%%", nodes[k].commitmentRAM*100),
 		}
 	}
 
-	ui.Render(table)
+	ui.Render(grid)
 
 	uiEvents := ui.PollEvents()
 	for {
