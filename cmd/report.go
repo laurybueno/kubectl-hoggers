@@ -163,9 +163,9 @@ func runReport(cmd *cobra.Command, args []string) {
 		"name",
 		"total pods",
 		"unrestricted pods",
-		"CPU reservation",
+		"CPU reservations",
 		"CPU limits",
-		"RAM reservation",
+		"RAM reservations",
 		"RAM limits",
 	}
 
