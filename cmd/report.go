@@ -39,8 +39,10 @@ type nodeData struct {
 	reservedRAM      int64
 	committedCPU     int64
 	committedRAM     int64
-	commitmentCPU    float64
-	commitmentRAM    float64
+	pReservedCPU     float64
+	pReservedRAM     float64
+	pCommittedCPU    float64
+	pCommittedRAM    float64
 }
 
 // reportCmd represents the report command
@@ -111,8 +113,10 @@ func runReport(cmd *cobra.Command, args []string) {
 			reservedRAM:      reservedRAM,
 			committedCPU:     committedCPU,
 			committedRAM:     committedRAM,
-			commitmentCPU:    float64(committedCPU) / float64(allocatableCPU),
-			commitmentRAM:    float64(committedRAM) / float64(allocatableRAM),
+			pReservedCPU:     float64(reservedCPU) / float64(allocatableCPU),
+			pReservedRAM:     float64(reservedRAM) / float64(allocatableRAM),
+			pCommittedCPU:    float64(committedCPU) / float64(allocatableCPU),
+			pCommittedRAM:    float64(committedRAM) / float64(allocatableRAM),
 		}
 	}
 
@@ -131,7 +135,7 @@ func runReport(cmd *cobra.Command, args []string) {
 
 	// Prepare title
 	title := widgets.NewParagraph()
-	title.Text = "[Resource commitment by pod 'limit' for each node](fg:green)"
+	title.Text = "[Resources reservations and limits by pods for each node](fg:green)"
 	title.Border = false
 
 	// Prepare table styles
@@ -157,12 +161,12 @@ func runReport(cmd *cobra.Command, args []string) {
 	// Table header
 	table.Rows[0] = []string{
 		"name",
-		"totalPods",
-		"unRestrictedPods",
-		"committedCPU",
-		"committedCPU (% of total)",
-		"committedRAM",
-		"committedRAM (% of total)",
+		"total pods",
+		"unrestricted pods",
+		"CPU reservation",
+		"CPU limits",
+		"RAM reservation",
+		"RAM limits",
 	}
 
 	// Table data
@@ -171,10 +175,10 @@ func runReport(cmd *cobra.Command, args []string) {
 			nodes[k].name,
 			fmt.Sprintf("%v", nodes[k].totalPods),
 			fmt.Sprintf("%v", nodes[k].unRestrictedPods),
-			fmt.Sprintf("%vm", nodes[k].committedCPU),
-			fmt.Sprintf("%.2f%%", nodes[k].commitmentCPU*100),
-			fmt.Sprintf("%vMi", nodes[k].committedRAM/(1024*1024)),
-			fmt.Sprintf("%.2f%%", nodes[k].commitmentRAM*100),
+			fmt.Sprintf("%.2f%%", nodes[k].pReservedCPU*100),
+			fmt.Sprintf("%.2f%%", nodes[k].pCommittedCPU*100),
+			fmt.Sprintf("%.2f%%", nodes[k].pReservedRAM*100),
+			fmt.Sprintf("%.2f%%", nodes[k].pCommittedRAM*100),
 		}
 	}
 
