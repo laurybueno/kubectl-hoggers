@@ -2,6 +2,8 @@
 Hoggers is a `kubectl` plugin that uses multiple Kubernetes API endpoints to show data about resource consumption in a Kubernetes cluster using only a terminal interface.
 
 ## Installation
+At the moment, only Linux distributions are supported. If you're running some other OS, try installing from source.
+
 ### From pre-built binary
 This downloads the pre-built binary and moves it to your PATH.
 ```
