@@ -1,6 +1,21 @@
 # Analyze resouce consumption in Kubernetes from your terminal
 Hoggers is a `kubectl` plugin that uses multiple Kubernetes API endpoints to show data about resource consumption in a Kubernetes cluster using only a terminal interface.
 
+## Installation
+### From pre-built binary
+This downloads the pre-built binary and moves it to your PATH.
+```
+curl -L -o kubectl-hoggers https://github.com/laurybueno/kubectl-hoggers/releases/download/v1.0.0/kubectl-hoggers
+chmod +x kubectl-hoggers
+sudo mv kubectl-hoggers /usr/bin
+```
+
+### From source
+You need to have [Go installed](https://golang.org/doc/install) to build this application.
+```
+go get github.com/laurybueno/kubectl-hoggers
+```
+
 ## Usage
 This plugin uses the `KUBECONFIG` environment variable to access cluster data. It must be set for everything to work.
 
