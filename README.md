@@ -42,7 +42,7 @@ Note: because of the way `kubectl` plugins work, running `kubectl hoggers` or `k
 - [ ] add animated GIFs to demonstrate usage
 
 ## Development workflow
-I suggest using Docker for develping and build this plugin.
+I suggest using Docker for developing and building this application.
 
 ```
 docker build -t kubectl-hoggers:dev -f compose/local/Dockerfile .
