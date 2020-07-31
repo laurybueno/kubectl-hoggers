@@ -7,7 +7,7 @@ At the moment, only Linux distributions are supported. If you're running some ot
 ### From pre-built binary
 This downloads the pre-built binary and moves it to your PATH.
 ```
-curl -L -o kubectl-hoggers https://github.com/laurybueno/kubectl-hoggers/releases/download/v1.0.0/kubectl-hoggers
+curl -L -o kubectl-hoggers https://github.com/laurybueno/kubectl-hoggers/releases/download/v1.0.1/kubectl-hoggers
 chmod +x kubectl-hoggers
 sudo mv kubectl-hoggers /usr/bin
 ```
