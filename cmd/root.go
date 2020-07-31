@@ -97,6 +97,9 @@ func init() {
 // initConfig reads in ENV variables if set.
 func initConfig() {
 	viper.AutomaticEnv() // read in environment variables
+	if viper.GetString("KUBECONFIG") == "" {
+		panic("$KUBECONFIG environment variable is not set. Aborting")
+	}
 
 	clientset = getClientSet()
 	metricsClientset = getMetricsClientset()
