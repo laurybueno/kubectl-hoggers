@@ -1,4 +1,4 @@
-# Analyze resouce consumption in Kubernetes from your terminal
+# Analyze resource consumption in Kubernetes from your terminal
 Hoggers is a `kubectl` plugin that uses multiple Kubernetes API endpoints to show data about resource consumption in a Kubernetes cluster using only a terminal interface.
 
 ## Installation
