@@ -19,7 +19,7 @@ go get github.com/laurybueno/kubectl-hoggers
 ```
 
 ## Usage
-This plugin uses the `KUBECONFIG` environment variable to access cluster data. It must be set for everything to work.
+This plugin checks the `KUBECONFIG` environment variable to find the cluster config file. You can also pass its path with the `--kubeconfig` flag.
 
 Check CPU and RAM reservations/limits for each node in a cluster
 ```
@@ -34,7 +34,7 @@ kubectl hoggers top
 Note: because of the way `kubectl` plugins work, running `kubectl hoggers` or `kubectl-hoggers` gives the same results.
 
 ## Roadmap
-- [ ] allow `KUBECONFIG` to be set via command flag
+- [x] allow `KUBECONFIG` to be set via command flag
 - [ ] output `report` to a file
 - [ ] add a namespace option to `report`
 - [ ] add table scroll in `report`

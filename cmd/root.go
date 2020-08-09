@@ -49,9 +49,8 @@ func Execute() {
 	}
 }
 
-func getClientSet() *kubernetes.Clientset {
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
+func getClientSet(kubeconfig string) *kubernetes.Clientset {
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -65,9 +64,8 @@ func getClientSet() *kubernetes.Clientset {
 	return clientset
 }
 
-func getMetricsClientset() *metricsv.Clientset {
-	// use the current context in kubeconfig
-	config, err := clientcmd.BuildConfigFromFlags("", viper.GetString("KUBECONFIG"))
+func getMetricsClientset(kubeconfig string) *metricsv.Clientset {
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
 		panic(err.Error())
 	}
@@ -80,27 +78,26 @@ func getMetricsClientset() *metricsv.Clientset {
 	return metricsClientset
 }
 
+var kbFile string
+
 func init() {
+	// Try to get a kubeconfig flag, if available
+	rootCmd.PersistentFlags().StringVar(&kbFile, "kubeconfig", "", "path to kubeconfig file (default is environment variable $KUBECONFIG")
+
 	cobra.OnInitialize(initConfig)
-
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
-	// rootCmd.PersistentFlags().StringVar(&kbFile, "kubeconfig", "", "path to kubeconfig file (default is environment variable $KUBECONFIG or $HOME/kube/.config.yaml)")
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
 
-// initConfig reads in ENV variables if set.
 func initConfig() {
-	viper.AutomaticEnv() // read in environment variables
-	if viper.GetString("KUBECONFIG") == "" {
-		panic("$KUBECONFIG environment variable is not set. Aborting")
+	// If kbFile is already set, then it has been passed as a command line flag
+	// If not, try the get its value from environment
+	if kbFile == "" {
+		viper.AutomaticEnv() // read in environment variables
+		if viper.GetString("KUBECONFIG") == "" {
+			panic("$KUBECONFIG environment variable is not set. Aborting")
+		}
+		kbFile = viper.GetString("KUBECONFIG")
 	}
 
-	clientset = getClientSet()
-	metricsClientset = getMetricsClientset()
+	clientset = getClientSet(kbFile)
+	metricsClientset = getMetricsClientset(kbFile)
 }
