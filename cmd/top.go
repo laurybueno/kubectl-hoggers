@@ -88,6 +88,8 @@ func runTop(cmd *cobra.Command, args []string) {
 }
 
 func prepareDataTable() {
+	defer ui.Close()
+
 	for {
 		pods := getPodsData()
 		getNodeNameForPods(pods)
@@ -150,6 +152,8 @@ func updateInterface() {
 }
 
 func updateGauge(current, total int) {
+	defer ui.Close()
+
 	if gauge == nil {
 		gauge = widgets.NewGauge()
 
