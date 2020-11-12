@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"runtime/debug"
 	"sort"
 	"time"
 
@@ -87,8 +88,15 @@ func runTop(cmd *cobra.Command, args []string) {
 	}
 }
 
+func panicCleanUp() {	
+	if r := recover(); r != nil {
+		ui.Close()
+		fmt.Printf("Something went wrong. Here's what we know: %#v", string(debug.Stack()))
+  }
+}
+
 func prepareDataTable() {
-	defer ui.Close()
+	defer panicCleanUp()
 
 	for {
 		pods := getPodsData()
@@ -152,7 +160,7 @@ func updateInterface() {
 }
 
 func updateGauge(current, total int) {
-	defer ui.Close()
+	defer panicCleanUp()
 
 	if gauge == nil {
 		gauge = widgets.NewGauge()
